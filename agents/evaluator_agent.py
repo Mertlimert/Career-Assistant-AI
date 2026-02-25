@@ -49,12 +49,7 @@ Eşik (approved için total_score >= bu olmalı): {self.threshold}"""
             )
         except Exception as e:
             logger.exception("Evaluator error: %s", e)
-            return {
-                "scores": {},
-                "total_score": 0,
-                "feedback": "Değerlendirme hatası.",
-                "approved": False,
-            }
+            raise RuntimeError(f"Evaluator LLM hatası: {e}") from e
 
         # Parse JSON
         try:

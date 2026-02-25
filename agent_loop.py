@@ -136,16 +136,23 @@ class AgentLoop:
         feedback_for_revision = None
         response_text = ""
         for attempt in range(1, self.settings.max_revision_attempts + 1):
-            response_text = self.career_agent.generate_response(
-                employer_message, evaluator_feedback=feedback_for_revision
-            )
+            try:
+                response_text = self.career_agent.generate_response(
+                    employer_message, evaluator_feedback=feedback_for_revision
+                )
+            except Exception as e:
+                logger.exception("Career Agent LLM hatası: %s", e)
+                raise RuntimeError(f"AI yanıt üretemedi (LLM API hatası): {e}") from e
+
             if not (response_text or "").strip():
-                response_text = "Merhaba, mesajınız için teşekkürler. Size en kısa sürede dönüş yapacağım."
+                raise RuntimeError("AI boş yanıt üretti. API anahtarınızı kontrol edin.")
+
             try:
                 eval_result = self.evaluator.evaluate(employer_message, response_text)
             except Exception as e:
-                logger.warning("Evaluator failed, approving: %s", e)
-                eval_result = {"total_score": 80, "scores": {}, "feedback": "", "approved": True}
+                logger.exception("Evaluator LLM hatası: %s", e)
+                raise RuntimeError(f"Değerlendirici çalışamadı (LLM API hatası): {e}") from e
+
             evaluation_log.append({
                 "attempt": attempt,
                 "total_score": eval_result.get("total_score"),

@@ -188,7 +188,7 @@ Telegram'a gelen "İnsan Müdahalesi Gerekli" bildirimi.
 
 Kullanıcı Telegram'daki uyarı mesajına reply ile kendi cevabını yazıyor.
 
-![Telegram Reply](screenshots/06_telegram_reply.png)
+![Telegram Reply](screenshots/07_telegram_reply.png)
 
 ### 5.7 Telegram – Profesyonelleştirilmiş Yanıt
 

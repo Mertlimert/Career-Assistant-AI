@@ -111,9 +111,11 @@ def process_message(req: EmployerMessageRequest):
     except Exception as e:
         logger.exception("Process error: %s", e)
         err_msg = str(e).lower()
-        if "api_key" in err_msg or "authentication" in err_msg or "invalid" in err_msg or "api_key_invalid" in err_msg:
-            raise HTTPException(status_code=503, detail="Gemini API anahtari gecersiz veya eksik.")
-        return JSONResponse(status_code=500, content={"detail": GENEL_HATA_MESAJI})
+        if "401" in err_msg or "authentication" in err_msg or "unauthorized" in err_msg or "user not found" in err_msg:
+            raise HTTPException(status_code=503, detail="API anahtarı geçersiz veya süresi dolmuş. .env dosyasındaki GEMINI_API_KEY değerini kontrol edin.")
+        if "api" in err_msg and ("hata" in err_msg or "error" in err_msg or "fail" in err_msg):
+            raise HTTPException(status_code=503, detail=f"LLM API hatası: {e}")
+        raise HTTPException(status_code=500, detail=f"Sistem hatası: {e}")
 
     try:
         # Yaniti JSON-guvenli dict yapip JSONResponse ile dondur

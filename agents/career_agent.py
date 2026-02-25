@@ -98,7 +98,4 @@ class CareerAgent:
             return raw or ""
         except Exception as e:
             logger.exception("Career agent error: %s", e)
-            return (
-                "Mesajınız için teşekkür ederim. "
-                "Yanıtımı kısa süre içinde ileteceğim. İyi günler dilerim."
-            )
+            raise RuntimeError(f"LLM API hatası: {e}") from e
