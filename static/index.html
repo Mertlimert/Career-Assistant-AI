@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Assistant AI</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #334155;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.35);
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hero { text-align: center; padding: 2.5rem 1rem 1rem; max-width: 600px; }
+    .hero h1 {
+      font-size: 1.75rem; font-weight: 700;
+      background: linear-gradient(135deg, #818cf8, #6366f1, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p { color: var(--text2); margin-top: 0.5rem; font-size: 0.95rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--surface2);
+      border-radius: var(--radius); padding: 1.5rem;
+      width: 100%; max-width: 600px; margin: 1rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    label { display: block; color: var(--text2); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+    input, textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--surface2);
+      border-radius: 10px; padding: 0.7rem 1rem; color: var(--text);
+      font-size: 0.95rem; transition: border 0.2s, box-shadow 0.2s; outline: none;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    textarea { min-height: 110px; resize: vertical; }
+    .form-group { margin-bottom: 1rem; }
+    .btn {
+      width: 100%; padding: 0.8rem; border: none; border-radius: 10px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; color: #fff;
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes borderPulse {
+      0%,100% { border-color: rgba(234,179,8,0.4); }
+      50% { border-color: rgba(234,179,8,0.8); }
+    }
+    .result-card {
+      animation: fadeUp 0.4s ease;
+      background: var(--surface); border: 1px solid var(--surface2);
+      border-radius: var(--radius); padding: 1.5rem;
+      width: 100%; max-width: 600px; margin: 0 1rem 1rem;
+    }
+    .result-card.waiting { animation: borderPulse 2s ease infinite; }
+    .result-card h3 { font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+    .response-text { line-height: 1.65; font-size: 0.95rem; white-space: pre-wrap; }
+    .meta-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--surface2); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.7rem;
+      border-radius: 20px; background: var(--bg);
+    }
+    .badge.safe { color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .badge.warn { color: var(--yellow); border: 1px solid rgba(234,179,8,0.3); }
+    .badge.danger { color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .badge .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .badge.safe .dot { background: var(--green); }
+    .badge.warn .dot { background: var(--yellow); }
+    .badge.danger .dot { background: var(--red); }
+    .eval-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .eval-chip { font-size: 0.75rem; padding: 0.2rem 0.55rem; border-radius: 6px; background: var(--surface2); color: var(--text2); }
+    .alert-box {
+      margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 10px;
+      font-size: 0.85rem; line-height: 1.5;
+      background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.25); color: #fde68a;
+    }
+    .success-box {
+      margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 10px;
+      font-size: 0.85rem; line-height: 1.5;
+      background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: #86efac;
+    }
+    .error-box {
+      animation: fadeUp 0.3s ease;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5; border-radius: 10px; padding: 1rem;
+      margin: 0 1rem 1rem; max-width: 600px; width: 100%; font-size: 0.9rem;
+    }
+    .loading-text { animation: pulse 1.5s ease infinite; color: var(--text2); text-align: center; padding: 1rem; }
+    .original-reply { margin-top: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 8px; background: var(--surface2); color: var(--text2); font-size: 0.82rem; font-style: italic; }
+    footer { color: var(--text2); font-size: 0.75rem; padding: 2rem 1rem; text-align: center; }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Career Assistant AI</h1>
+    <p>Yapay zeka destekli kariyer asistanınız. İşveren mesajlarına profesyonel yanıtlar üretir, değerlendirir ve riskli durumları tespit eder.</p>
+  </div>
+
+  <div class="card">
+    <div class="form-group">
+      <label>Gönderen</label>
+      <input type="text" id="sender" value="İşveren" placeholder="Şirket / kişi adı">
+    </div>
+    <div class="form-group">
+      <label>İşveren Mesajı</label>
+      <textarea id="message" placeholder="Örn: Merhaba, sizi yazılım geliştirici pozisyonu için mülakata davet etmek istiyoruz. Çarşamba 14:00 uygun mu?"></textarea>
+    </div>
+    <button class="btn" id="btn" onclick="send()">Yanıt Üret</button>
+  </div>
+
+  <div id="out"></div>
+
+  <footer>Career Assistant AI Agent &mdash; <a href="/docs" target="_blank">API Docs</a></footer>
+
+  <script>
+    let pollTimer = null;
+
+    async function send() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      const btn = document.getElementById('btn');
+      const out = document.getElementById('out');
+      const message = document.getElementById('message').value.trim();
+      const sender = document.getElementById('sender').value.trim() || 'İşveren';
+      if (!message) { out.innerHTML = '<div class="error-box">Lütfen bir mesaj girin.</div>'; return; }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Yanıt üretiliyor...';
+      out.innerHTML = '<div class="loading-text">Yapay zeka yanıt üretiyor ve değerlendiriyor...</div>';
+      try {
+        const r = await fetch('/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, sender })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.detail || 'Sunucu hatası');
+
+        if (data.human_intervention && data.escalation_id) {
+          out.innerHTML = buildWaiting(data);
+          startPolling(data.escalation_id);
+        } else {
+          out.innerHTML = buildAutoResponse(data);
+        }
+      } catch (e) {
+        out.innerHTML = '<div class="error-box">' + esc(e.message) + '</div>';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Yanıt Üret';
+    }
+
+    function buildWaiting(d) {
+      let html = '<div class="result-card waiting" id="esc-card" style="border-color:rgba(234,179,8,0.4)">';
+      html += '<h3 style="color:#eab308">&#9888; Telegram\'dan Yanıt Bekleniyor...</h3>';
+      html += '<div class="alert-box" style="margin-top:0;margin-bottom:1rem">';
+      html += '<strong>Bu mesaj hassas bir konu içeriyor</strong>';
+      if (d.unknown_result && d.unknown_result.category && d.unknown_result.category !== 'none') {
+        html += ' (Kategori: <strong>' + esc(d.unknown_result.category) + '</strong>)';
+      }
+      html += '<br><br>';
+      html += 'Mesaj Telegram\'a iletildi. Telegram\'daki uyarı mesajına <strong>reply</strong> ile cevabınızı yazın. ';
+      html += 'Bot cevabınızı profesyonelleştirip buraya gönderecek.';
+      html += '</div>';
+      html += '<div class="loading-text" style="padding:0.5rem 0"><span class="spinner"></span> Telegram yanıtınız bekleniyor...</div>';
+      html += '<div class="meta-bar">';
+      html += '<span class="badge warn"><span class="dot"></span>Beklemede</span>';
+      html += '<span class="badge danger"><span class="dot"></span>Telegram\'a İletildi</span>';
+      html += '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    function buildResolved(data) {
+      let html = '<div class="result-card" style="border-color:rgba(34,197,94,0.4)">';
+      html += '<h3 style="color:#22c55e">&#10003; Yanıt Gönderildi</h3>';
+      html += '<div class="success-box" style="margin-top:0;margin-bottom:1rem">';
+      html += 'Telegram\'dan gelen cevabınız profesyonelleştirildi ve işverene gönderildi.';
+      html += '</div>';
+      html += '<div class="response-text">' + esc(data.professional_response) + '</div>';
+      if (data.original_reply) {
+        html += '<div class="original-reply">Orijinal cevabınız: "' + esc(data.original_reply) + '"</div>';
+      }
+      html += '<div class="meta-bar">';
+      html += '<span class="badge safe"><span class="dot"></span>İnsan Yanıtı (Profesyonelleştirildi)</span>';
+      html += '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    function buildAutoResponse(d) {
+      let html = '<div class="result-card">';
+      html += '<h3>Üretilen Yanıt</h3>';
+      html += '<div class="response-text">' + esc(d.response) + '</div>';
+      html += '<div class="meta-bar">';
+      html += '<span class="badge safe"><span class="dot"></span>Otomatik Yanıt</span>';
+      if (d.evaluation_log && d.evaluation_log.length) {
+        const last = d.evaluation_log[d.evaluation_log.length - 1];
+        const score = last.total_score || 0;
+        const cls = score >= 80 ? 'safe' : score >= 60 ? 'warn' : 'danger';
+        html += '<span class="badge ' + cls + '"><span class="dot"></span>Skor: ' + score + '/100</span>';
+        html += '<span class="badge safe"><span class="dot"></span>Deneme: ' + d.evaluation_log.length + '</span>';
+      }
+      html += '</div>';
+      if (d.evaluation_log && d.evaluation_log.length) {
+        html += '<div class="meta-bar"><div class="eval-chips">';
+        const last = d.evaluation_log[d.evaluation_log.length - 1];
+        if (last.scores && typeof last.scores === 'object') {
+          const labels = {professional_tone:'Ton',clarity:'Netlik',completeness:'Bütünlük',safety:'Güvenlik',relevance:'Uygunluk'};
+          for (const [k,v] of Object.entries(last.scores)) {
+            html += '<span class="eval-chip">' + (labels[k]||k) + ': ' + v + '</span>';
+          }
+        }
+        html += '</div></div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function startPolling(escId) {
+      pollTimer = setInterval(async () => {
+        try {
+          const r = await fetch('/escalation/' + escId);
+          if (!r.ok) return;
+          const data = await r.json();
+          if (data.status === 'resolved' && data.professional_response) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+            const out = document.getElementById('out');
+            out.innerHTML = buildResolved(data);
+          }
+        } catch (e) {}
+      }, 3000);
+    }
+
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    document.getElementById('message').addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') send(); });
+  </script>
+</body>
+</html>

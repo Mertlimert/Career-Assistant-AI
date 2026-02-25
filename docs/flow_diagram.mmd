@@ -1,0 +1,11 @@
+flowchart TD
+    A[İşveren Mesajı] --> B[Bildirim: Yeni Mesaj]
+    B --> C{Bilinmeyen Soru?\nUnknown Question Tool}
+    C -->|Evet| D[İnsan Müdahalesi Bildirimi]
+    D --> E[Genel Yanıt Döndür]
+    C -->|Hayır| F[Career Agent\nYanıt Üret]
+    F --> G[Evaluator\nPuan + Onay?]
+    G -->|Skor < Eşik| H[Geri Bildirim ile Revize]
+    H --> F
+    G -->|Onaylı| I[Bildirim: Yanıt Gönderildi]
+    I --> J[Son Yanıtı Döndür]
