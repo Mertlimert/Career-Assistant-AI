@@ -154,50 +154,38 @@ Bu proje, agent-tool etkileşimi, self-evaluating AI sistemleri, human-in-the-lo
 
 ## 5. Uygulama Çalışma Akışı (Ekran Görüntüleri)
 
-### 5.1 Ana Sayfa – Mesaj Giriş Ekranı
+### 5.1 Ana Sayfa – Mesaj Giriş ve Yükleme Ekranı
 
-İşveren mesajının girildiği web arayüzü.
+İşveren mesajı girilip "Yanıt Üret" butonuna basıldığında, yapay zeka yanıt üretirken yükleme göstergesi görüntülenir.
 
-![Ana Sayfa](screenshots/01_ana_sayfa.png)
+![Ana Sayfa - Yükleme](screenshots/Ekran%20görüntüsü%202026-02-25%20145353.png)
 
-### 5.2 Senaryo 1: Standart Mülakat Daveti (Otomatik Yanıt)
+### 5.2 Senaryo 1: Otomatik Yanıt (AI Cevap Üretiyor)
 
-İşveren mülakata davet ediyor → AI profesyonel yanıt üretiyor → Evaluator puanlıyor → Onay.
+İşveren mesajına yapay zeka profesyonel yanıt üretiyor. Evaluator Agent 5 kriter üzerinden puanlıyor (Ton: 90, Netlik: 100, Bütünlük: 80, Güvenlik: 100, Uygunluk: 100). Toplam skor 94/100 ile ilk denemede onaylanıyor.
 
-![Otomatik Yanıt](screenshots/02_otomatik_yanit.png)
+![Otomatik Yanıt](screenshots/01_telegram_profesyonel.png)
 
-### 5.3 Senaryo 2: Teknik Soru (Otomatik Yanıt)
+### 5.3 Senaryo 2: Riskli Soru – Telegram'dan Yanıt Bekleniyor
 
-Profil kapsamındaki teknik soru → AI yanıt veriyor → Evaluator puanlıyor.
+"Maaş beklentiniz nedir" gibi hassas bir konu tespit edildiğinde, yapay zeka yanıt **üretmiyor**. Mesaj Telegram'a iletiliyor ve web arayüzünde sarı bekleme kartı gösteriliyor. Kullanıcı Telegram'dan reply ile cevabını yazana kadar bu ekran aktif kalır.
 
-![Teknik Soru Yanıtı](screenshots/03_teknik_soru.png)
+![Riskli Soru - Bekleme](screenshots/Ekran%20görüntüsü%202026-02-25%20145520.png)
 
-### 5.4 Senaryo 3: Riskli Soru – Telegram'dan Yanıt Bekleniyor
+### 5.4 Telegram Bildirimleri
 
-Maaş/sözleşme gibi hassas konu → AI yanıt üretmiyor → Telegram'a uyarı gidiyor → Web UI'da bekleme kartı.
+Telegram Bot üzerinden gelen bildirimler: "Yeni İşveren Mesajı" (her mesajda), "Yanıt Gönderildi" (otomatik yanıtlarda) ve "İnsan Müdahalesi Gerekli" (riskli konularda). İnsan müdahalesi uyarısında sebep (salary) ve işverenin orijinal mesajı gösterilir.
 
-![Riskli Soru - Bekleme](screenshots/04_riskli_soru_bekleme.png)
+![Telegram Bildirimleri](screenshots/WhatsApp%20Image%202026-02-25%20at%2012.48.17.jpeg)
 
-### 5.5 Telegram Bildirimi – İnsan Müdahalesi Uyarısı
+### 5.5 Web UI – Yanıt Gönderildi (Escalation Resolved)
 
-Telegram'a gelen "İnsan Müdahalesi Gerekli" bildirimi.
+Kullanıcı Telegram'daki uyarı mesajına reply ile ham cevabını yazdıktan sonra, bot bu cevabı LLM ile profesyonelleştirir. Profesyonel yanıt hem Telegram'a gönderilir hem de web arayüzünde sarı bekleme kartı otomatik olarak yeşil "Yanıt Gönderildi" kartına dönüşür. Orijinal ham cevap da alt kısımda gösterilir.
 
-![Telegram Uyarı](screenshots/05_telegram_uyari.png)
+![Yanıt Gönderildi](screenshots/07_telegram_profesyonel.png)
 
-### 5.6 Telegram Reply – Ham Cevap Yazma
+### 5.6 Hata Durumu – API Hatası
 
-Kullanıcı Telegram'daki uyarı mesajına reply ile kendi cevabını yazıyor.
+API anahtarı geçersiz veya süresi dolmuş olduğunda sistem net bir hata mesajı gösterir. Yanıltıcı otomatik mesajlar üretmek yerine, kullanıcıya doğrudan sorunun ne olduğu bildirilir.
 
-![Telegram Reply](screenshots/07_telegram_reply.png)
-
-### 5.7 Telegram – Profesyonelleştirilmiş Yanıt
-
-Bot, ham cevabı profesyonelleştirip Telegram'da geri gönderiyor.
-
-![Telegram Profesyonel Yanıt](screenshots/07_telegram_profesyonel.png)
-
-### 5.8 Web UI – Yanıt Gönderildi (Escalation Resolved)
-
-Telegram'dan gelen cevap otomatik olarak web arayüzüne yansıyor, sarı kart yeşile dönüyor.
-
-![Web UI Resolved](screenshots/08_web_ui_resolved.png)
+![Hata Durumu](screenshots/Ekran%20görüntüsü%202026-02-25%20145401.png)
